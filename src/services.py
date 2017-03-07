@@ -28,7 +28,7 @@ class TituloTesouroCRUD(object):
         assert action in TITULO_TESOURO_ACTIONS, \
             '"action" must be one of {}.'.format(TITULO_TESOURO_CATEGORIES)
 
-        assert isinstance(amount, float), '"amount" must be a float.'
+        assert isinstance(amount, float) or isinstance(amount, int), '"amount" must be a float or a int.'
         assert amount > 0, '"amount" must be greater than zero.'
 
         with open('{}/load-input-data.sql'.format(TRANSACTIONS_PATH)) as f:
@@ -45,8 +45,8 @@ class TituloTesouroCRUD(object):
         transaction = transaction.format(value)
         cur.execute(transaction)
 
-        query = "SELECT id FROM tesouro_direto_series WHERE category = '{}' AND action = '{}' AND expire_at = '{}'"
-        cur.execute(query.format(category, action, expire_at))
+        query = "SELECT id FROM category_ids WHERE category = '{}'".format(category)
+        cur.execute(query)
         _id = cur.fetchall()[0][0]
 
         cur.close()

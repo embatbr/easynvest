@@ -29,17 +29,46 @@ To install all dependencies, execute script *install.sh*, located in the project
 
 To create and populate the database. Execute the script *start-db.sh* (only once; a second attempt may raise an exception due to primary key collision).
 
-The next step is to execute the REST API. Type `./start-app.sh` in your console to start the server locally listening to port 8000.
+The next step is to execute the REST API. Type `./start-app.sh` in your console to start the server locally listening to port 8000 (default).
+
+To query the database, log in using `psql -h localhost -d easynvest -U easynvest`. The password can be seen in the file **src/basics.py**.
 
 
 ## Details
 
-The bash file calls the module `main` through Gunicorn. This module creates all dependencies to be injected in the `EndpointExpositor` object. This object is responsible for bind each endpoint to its handler and expose them. The endpoints are:
+The bash file calls the module `main` through Gunicorn. This module creates all dependencies to be injected in the `EndpointExpositor` object. This object is responsible for bind each endpoint to its handler and expose them.
+
+### Endpoints
 
 #### /
 
-Show the current state of the service. Used only as health checker.
+Shows the current state of the service. Used only as health checker.
 
 #### /titulo_tesouro
 
 Used by the first four functionalities described.
+
+###### 1. POST /titulo_tesouro
+
+The POST body is similar to the one below:
+
+```json
+{
+    "categoria_titulo": "NTN-B",
+    "mês": 4,
+    "ano": 2017,
+    "ação": "venda",
+    "valor": 15321.99
+}
+```
+
+The types of each parameter can be guessed: string, int, int, string and float (or int). The field **valor** may receive a number such as 15321.99, 15321.99999 or 15.321. In case of a float with more than 2 decimals, it is rounded.
+
+
+## Testing
+
+Test coverage in this project is not high (and this is a good thing). Since many unit tests can be replaced by a simple `assert` and the project was design in a way that module `services` is only used by module `endpoints`, all failures the first may raise will appear when testing the second.
+
+The package `unittest` from Python is used for both unit tests and system tests.
+
+All tests are found in directory *tests*.
