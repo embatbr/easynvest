@@ -58,7 +58,7 @@ class RequestHandler(object):
         logging.info(message)
 
         resp.body = json.dumps({
-            'message': message
+            'success': message
         })
         self.set_response_status_code(resp, 200)
 
@@ -66,7 +66,7 @@ class RequestHandler(object):
         logging.info(message)
 
         resp.body = json.dumps({
-            'message': message
+            'success': message
         })
         self.set_response_status_code(resp, 201)
 
@@ -126,10 +126,6 @@ class TituloTesouroRequestHandler(RequestHandler):
             ret = self.titulo_tesouro_crud.create(body['categoria_titulo'], body['mês'],
                                                   body['ano'], body['ação'], body['valor'])
 
-            self.created(resp, {
-                'success': ret
-            })
+            self.created(resp, ret)
         except Exception as e:
-            self.ok(resp, {
-                'fail': str(e)
-            })
+            self.err_bad_request(resp, str(e))

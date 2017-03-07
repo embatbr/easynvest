@@ -3,3 +3,4 @@ gunicorn
 openpyxl
 pendulum
 psycopg2
+requests

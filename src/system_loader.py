@@ -14,9 +14,24 @@ logging.basicConfig(format='[%(asctime)s] [%(levelname)s] %(message)s',
                     level=getattr(logging, 'INFO', 'DEBUG'))
 
 
+def drop_database(filename='drop-all.sql'):
+    schemas_filepath = '{}/{}'.format(SCHEMAS_PATH, filename)
+    with open(schemas_filepath) as f:
+        sql = f.read()
+
+    conn = psycopg2.connect(**DATABASE_PARAMS)
+    cur = conn.cursor()
+
+    logging.info('Attempting to drop schemas.')
+    cur.execute(sql)
+    logging.info('Schemas droppped.\n')
+
+    cur.close()
+    conn.close()
+
+
 def create_database(filename='create-all.sql'):
     schemas_filepath = '{}/{}'.format(SCHEMAS_PATH, filename)
-    logging.info('Reading schemas file "{}"'.format(schemas_filepath))
     with open(schemas_filepath) as f:
         sql = f.read()
 
@@ -95,6 +110,7 @@ def populate_database(values):
 if __name__ == '__main__':
     logging.info('Preparing to load system.\n')
 
+    drop_database()
     create_database()
     values = read_xlsx('input-data.xlsx')
     populate_database(values)

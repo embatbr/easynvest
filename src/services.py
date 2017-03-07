@@ -26,10 +26,13 @@ class TituloTesouroCRUD(object):
 
         assert isinstance(action, str), '"action" must be a string.'
         assert action in TITULO_TESOURO_ACTIONS, \
-            '"action" must be one of {}.'.format(TITULO_TESOURO_CATEGORIES)
+            '"action" must be one of {}.'.format(TITULO_TESOURO_ACTIONS)
 
         assert isinstance(amount, float) or isinstance(amount, int), '"amount" must be a float or a int.'
         assert amount > 0, '"amount" must be greater than zero.'
+
+        if isinstance(amount, int):
+            amount = float(amount)
 
         with open('{}/load-input-data.sql'.format(TRANSACTIONS_PATH)) as f:
             transaction = f.read()
@@ -57,5 +60,6 @@ class TituloTesouroCRUD(object):
             'categoria_titulo': category,
             'mês': month,
             'ano': year,
+            'ação': action,
             'valor': amount
         }
