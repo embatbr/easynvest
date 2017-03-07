@@ -28,3 +28,18 @@ To install all dependencies, execute script *install.sh*, located in the project
 ## Running
 
 To create and populate the database. Execute the script *start-db.sh* (only once; a second attempt may raise an exception due to primary key collision).
+
+The next step is to execute the REST API. Type `./start-app.sh` in your console to start the server locally listening to port 8000.
+
+
+## Details
+
+The bash file calls the module `main` through Gunicorn. This module creates all dependencies to be injected in the `EndpointExpositor` object. This object is responsible for bind each endpoint to its handler and expose them. The endpoints are:
+
+#### /
+
+Show the current state of the service. Used only as health checker.
+
+#### /titulo_tesouro
+
+Used by the first four functionalities described.
