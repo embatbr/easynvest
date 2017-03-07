@@ -1,0 +1,5 @@
+falcon
+gunicorn
+openpyxl
+pendulum
+psycopg2
