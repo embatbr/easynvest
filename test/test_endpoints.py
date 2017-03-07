@@ -4,7 +4,6 @@
 
 import json
 import os
-import psycopg2
 import requests
 import sys
 import unittest
@@ -12,6 +11,7 @@ import unittest
 sys.path.insert(0, os.environ.get('PROJECT_ROOT_PATH'))
 
 from src.basics import DATABASE_PARAMS, TITULO_TESOURO_CATEGORIES, TITULO_TESOURO_ACTIONS
+from src.system_loader import drop_database, create_database
 
 
 class TestTituloTesouroRequestHandler(unittest.TestCase):
@@ -19,13 +19,8 @@ class TestTituloTesouroRequestHandler(unittest.TestCase):
     BASE_URL = 'http://localhost:8000'
 
     def setUp(self):
-        conn = psycopg2.connect(**DATABASE_PARAMS)
-        cur = conn.cursor()
-
-        cur.execute("TRUNCATE TABLE tesouro_direto_series;")
-
-        cur.close()
-        conn.close()
+        drop_database(verbose=False)
+        create_database(verbose=False)
 
     def test_create_with_no_post_body(self):
         resp = requests.post('{}/titulo_tesouro'.format(TestTituloTesouroRequestHandler.BASE_URL))

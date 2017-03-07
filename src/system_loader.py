@@ -6,7 +6,10 @@ import logging
 import openpyxl
 import psycopg2
 
-from basics import SCHEMAS_PATH, DATABASE_PARAMS, RESOURCES_PATH, TRANSACTIONS_PATH
+try:
+    from basics import SCHEMAS_PATH, DATABASE_PARAMS, RESOURCES_PATH, TRANSACTIONS_PATH
+except ImportError:
+    from src.basics import SCHEMAS_PATH, DATABASE_PARAMS, RESOURCES_PATH, TRANSACTIONS_PATH
 
 
 logging.basicConfig(format='[%(asctime)s] [%(levelname)s] %(message)s',
@@ -14,7 +17,7 @@ logging.basicConfig(format='[%(asctime)s] [%(levelname)s] %(message)s',
                     level=getattr(logging, 'INFO', 'DEBUG'))
 
 
-def drop_database(filename='drop-all.sql'):
+def drop_database(filename='drop-all.sql', verbose=True):
     schemas_filepath = '{}/{}'.format(SCHEMAS_PATH, filename)
     with open(schemas_filepath) as f:
         sql = f.read()
@@ -22,15 +25,17 @@ def drop_database(filename='drop-all.sql'):
     conn = psycopg2.connect(**DATABASE_PARAMS)
     cur = conn.cursor()
 
-    logging.info('Attempting to drop schemas.')
+    if verbose:
+        logging.info('Attempting to drop schemas.')
     cur.execute(sql)
-    logging.info('Schemas droppped.\n')
+    if verbose:
+        logging.info('Schemas droppped.\n')
 
     cur.close()
     conn.close()
 
 
-def create_database(filename='create-all.sql'):
+def create_database(filename='create-all.sql', verbose=True):
     schemas_filepath = '{}/{}'.format(SCHEMAS_PATH, filename)
     with open(schemas_filepath) as f:
         sql = f.read()
@@ -38,9 +43,11 @@ def create_database(filename='create-all.sql'):
     conn = psycopg2.connect(**DATABASE_PARAMS)
     cur = conn.cursor()
 
-    logging.info('Attempting to create schemas.')
+    if verbose:
+        logging.info('Attempting to create schemas.')
     cur.execute(sql)
-    logging.info('Schemas created.\n')
+    if verbose:
+        logging.info('Schemas created.\n')
 
     cur.close()
     conn.close()
@@ -58,15 +65,17 @@ def get_multiplier(raw):
         return 1000*1000
     return 1
 
-def read_xlsx(filename):
+def read_xlsx(filename, verbose=True):
     xlsx_filepath = '{}/{}'.format(RESOURCES_PATH, filename)
-    logging.info('Reading data from file "{}".'.format(xlsx_filepath))
+    if verbose:
+        logging.info('Reading data from file "{}".'.format(xlsx_filepath))
     workbook = openpyxl.load_workbook(xlsx_filepath)
     worksheet = workbook['Planilha1']
 
     values = list()
 
-    logging.info('Reading values.')
+    if verbose:
+        logging.info('Reading values.')
     for j in range(ord('C'), ord('O')):
         column = chr(j)
 
@@ -85,12 +94,13 @@ def read_xlsx(filename):
             value = "('{}', '{}', '{}', {})".format(category, action, date, amount)
             values.append(value)
 
-    logging.info('All values read.\n')
+    if verbose:
+        logging.info('All values read.\n')
 
     return values
 
 
-def populate_database(values):
+def populate_database(values, verbose=True):
     with open('{}/load-input-data.sql'.format(TRANSACTIONS_PATH)) as f:
         sql = f.read()
 
@@ -99,9 +109,11 @@ def populate_database(values):
     conn = psycopg2.connect(**DATABASE_PARAMS)
     cur = conn.cursor()
 
-    logging.info('Populating database.')
+    if verbose:
+        logging.info('Populating database.')
     cur.execute(sql)
-    logging.info('Database populated.\n')
+    if verbose:
+        logging.info('Database populated.\n')
 
     cur.close()
     conn.close()
