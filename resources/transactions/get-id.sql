@@ -1,0 +1,1 @@
+SELECT id FROM tesouro_direto_series WHERE category = '{}' AND action = '{}' AND expire_at = '{}';

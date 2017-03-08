@@ -25,4 +25,4 @@ SCHEMAS_PATH = '{}/schemas'.format(RESOURCES_PATH)
 TRANSACTIONS_PATH = '{}/transactions'.format(RESOURCES_PATH)
 
 TITULO_TESOURO_CATEGORIES = ['LTN', 'LFT', 'NTN-B', 'NTN-B Principal', 'NTN-C', 'NTN-F']
-TITULO_TESOURO_ACTIONS = ['venda', 'resgate']
+TITULO_TESOURO_ACTIONS = ['VENDA', 'RESGATE']

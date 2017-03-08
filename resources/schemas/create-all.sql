@@ -22,32 +22,15 @@ BEGIN
 END$$;
 
 
-CREATE TABLE IF NOT EXISTS category_ids (
-    id              SERIAL          NOT NULL,
-    category        category_type   NOT NULL,
-
-    PRIMARY KEY (id),
-    UNIQUE (category)
-);
-
-TRUNCATE TABLE category_ids;
-
-INSERT INTO category_ids (category) VALUES
-    ('LTN'),
-    ('LFT'),
-    ('NTN-B'),
-    ('NTN-B Principal'),
-    ('NTN-C'),
-    ('NTN-F');
-
-
 CREATE TABLE IF NOT EXISTS tesouro_direto_series (
+    id              SERIAL                          NOT NULL,
     category        category_type                   NOT NULL,
     action          action_type                     NOT NULL,
     expire_at       TIMESTAMP WITHOUT TIME ZONE     NOT NULL,
     amount          MONEY                           NOT NULL,
 
-    PRIMARY KEY (category, action, expire_at)
+    PRIMARY KEY (id),
+    UNIQUE (category, action, expire_at)
 );
 
 

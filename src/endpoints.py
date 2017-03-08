@@ -16,9 +16,12 @@ class EndpointExpositor(object):
     def __init__(self, falcon_api, titulo_tesouro_crud):
         self.falcon_api = falcon_api
 
+        titulo_tesouro_request_handler = TituloTesouroRequestHandler(titulo_tesouro_crud)
+
         self.endpoint_mapping = {
             '/': None,
-            '/titulo_tesouro': TituloTesouroRequestHandler(titulo_tesouro_crud)
+            '/titulo_tesouro': titulo_tesouro_request_handler,
+            '/titulo_tesouro/{titulo_id}': titulo_tesouro_request_handler
         }
 
         endpoints = list(self.endpoint_mapping.keys())
@@ -42,6 +45,12 @@ class RequestHandler(object):
     def on_post(self, req, resp):
         logging.info('POST request received at endpoint "{}"'.format(req.path))
 
+    def on_delete(self, req, resp):
+        logging.info('DELETE request received at endpoint "{}"'.format(req.path))
+
+    def on_put(self, req, resp):
+        logging.info('PUT request received at endpoint "{}"'.format(req.path))
+
     def set_response_status_code(self, resp, code):
         resp.status = getattr(falcon, 'HTTP_{}'.format(code))
         logging.info('Response status code: {}\n'.format(resp.status))
@@ -53,6 +62,14 @@ class RequestHandler(object):
             'err': message
         })
         self.set_response_status_code(resp, 400)
+
+    def err_not_found(self, resp, message):
+        logging.error(message)
+
+        resp.body = json.dumps({
+            'err': message
+        })
+        self.set_response_status_code(resp, 404)
 
     def ok(self, resp, message):
         logging.info(message)
@@ -89,7 +106,7 @@ class HelpRequestHandler(RequestHandler):
 
 
 class TituloTesouroRequestHandler(RequestHandler):
-    """Handler for endpoint "titulo_tesouro"
+    """Handler for POST in endpoint "titulo_tesouro"
     """
 
     def __init__(self, titulo_tesouro_crud):
@@ -127,5 +144,42 @@ class TituloTesouroRequestHandler(RequestHandler):
                                                   body['ano'], body['ação'], body['valor'])
 
             self.created(resp, ret)
+        except Exception as e:
+            self.err_bad_request(resp, str(e))
+
+    def on_delete(self, req, resp, titulo_id):
+        super().on_delete(req, resp)
+
+        try:
+            ret = self.titulo_tesouro_crud.delete(titulo_id)
+
+            if ret:
+                self.ok(resp, 'Deleted.')
+            else:
+                self.err_not_found(resp, '"titulo_id" has no register.')
+        except Exception as e:
+            self.err_bad_request(resp, str(e))
+
+    def on_put(self, req, resp, titulo_id):
+        super().on_put(req, resp)
+
+        if req.content_length == 0:
+            self.err_bad_request(resp, 'No request body.')
+            return
+
+        stream = req.bounded_stream.read().decode('utf8')
+        body = json.loads(stream)
+
+        if not body:
+            self.err_bad_request(resp, 'Empty request body.')
+            return
+
+        try:
+            ret = self.titulo_tesouro_crud.update(titulo_id, body)
+
+            if ret:
+                self.ok(resp, body)
+            else:
+                self.err_not_found(resp, '"titulo_id" has no register.')
         except Exception as e:
             self.err_bad_request(resp, str(e))

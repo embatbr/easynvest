@@ -22,6 +22,9 @@ class TestTituloTesouroRequestHandler(unittest.TestCase):
         drop_database(verbose=False)
         create_database(verbose=False)
 
+    def tearDownClass():
+        drop_database(verbose=False)
+
     def test_create_with_no_post_body(self):
         resp = requests.post('{}/titulo_tesouro'.format(TestTituloTesouroRequestHandler.BASE_URL))
 
@@ -204,7 +207,7 @@ class TestTituloTesouroRequestHandler(unittest.TestCase):
         self.assertEqual(resp.status_code, 201)
         self.assertEqual(resp.json(), {
             'success': {
-                'id': 3,
+                'id': 1,
                 'categoria_titulo': 'NTN-B',
                 'mês': 4,
                 'ano': 2017,
@@ -226,7 +229,7 @@ class TestTituloTesouroRequestHandler(unittest.TestCase):
         self.assertEqual(resp.status_code, 201)
         self.assertEqual(resp.json(), {
             'success': {
-                'id': 3,
+                'id': 1,
                 'categoria_titulo': 'NTN-B',
                 'mês': 5,
                 'ano': 2017,
@@ -246,8 +249,137 @@ class TestTituloTesouroRequestHandler(unittest.TestCase):
 
         self.assertEqual(resp.status_code, 400)
         self.assertIn('err', resp.json())
-        self.assertIn('duplicate key value violates unique constraint "tesouro_direto_series_pkey"',
+        self.assertIn('duplicate key value violates unique constraint "tesouro_direto_series_category_action_expire_at_key"',
             resp.json()['err'])
+
+    def test_delete_with_non_integer_id(self):
+        resp = requests.delete('{}/titulo_tesouro/three'.format(TestTituloTesouroRequestHandler.BASE_URL))
+
+        self.assertEqual(resp.status_code, 400)
+        self.assertIn('err', resp.json())
+        self.assertEqual('"titulo_id" must be an int.', resp.json()['err'])
+
+    def test_delete_with_non_positive_id(self):
+        resp = requests.delete('{}/titulo_tesouro/0'.format(TestTituloTesouroRequestHandler.BASE_URL))
+
+        self.assertEqual(resp.status_code, 400)
+        self.assertIn('err', resp.json())
+        self.assertEqual('"titulo_id" must be greater than zero.', resp.json()['err'])
+
+    def test_delete_with_non_existing_id(self):
+        resp = requests.delete('{}/titulo_tesouro/7'.format(TestTituloTesouroRequestHandler.BASE_URL))
+
+        self.assertEqual(resp.status_code, 404)
+        self.assertIn('err', resp.json())
+        self.assertEqual('"titulo_id" has no register.', resp.json()['err'])
+
+    def test_delete_with_existing_id(self):
+        resp = requests.post('{}/titulo_tesouro'.format(TestTituloTesouroRequestHandler.BASE_URL),
+            data=json.dumps({
+            'categoria_titulo': 'NTN-B',
+            'mês': 5,
+            'ano': 2017,
+            'ação': 'venda',
+            'valor': 666
+        }))
+
+        self.assertEqual(resp.status_code, 201)
+        self.assertEqual(resp.json(), {
+            'success': {
+                'id': 1,
+                'categoria_titulo': 'NTN-B',
+                'mês': 5,
+                'ano': 2017,
+                'ação': 'VENDA',
+                'valor': 666.00
+            }
+        })
+
+        resp = requests.delete('{}/titulo_tesouro/1'.format(TestTituloTesouroRequestHandler.BASE_URL))
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.json(), {
+            'success': 'Deleted.'
+        })
+
+    def test_update_with_no_body(self):
+        resp = requests.put('{}/titulo_tesouro/1'.format(TestTituloTesouroRequestHandler.BASE_URL))
+
+        self.assertEqual(resp.status_code, 400)
+        self.assertIn('err', resp.json())
+        self.assertEqual(resp.json()['err'], 'No request body.')
+
+    def test_update_with_empty_body(self):
+        resp = requests.put('{}/titulo_tesouro/1'.format(TestTituloTesouroRequestHandler.BASE_URL),
+            data=json.dumps({}))
+
+        self.assertEqual(resp.status_code, 400)
+        self.assertIn('err', resp.json())
+        self.assertEqual(resp.json()['err'], 'Empty request body.')
+
+    def test_update_with_non_integer_id(self):
+        resp = requests.put('{}/titulo_tesouro/three'.format(TestTituloTesouroRequestHandler.BASE_URL),
+            data=json.dumps({
+            'categoria_titulo': 'NTN-B Principal'
+        }))
+
+        self.assertEqual(resp.status_code, 400)
+        self.assertIn('err', resp.json())
+        self.assertEqual('"titulo_id" must be an int.', resp.json()['err'])
+
+    def test_update_with_non_positive_id(self):
+        resp = requests.put('{}/titulo_tesouro/0'.format(TestTituloTesouroRequestHandler.BASE_URL),
+            data=json.dumps({
+            'categoria_titulo': 'NTN-B Principal'
+        }))
+
+        self.assertEqual(resp.status_code, 400)
+        self.assertIn('err', resp.json())
+        self.assertEqual('"titulo_id" must be greater than zero.', resp.json()['err'])
+
+    def test_update_with_non_existing_id(self):
+        resp = requests.put('{}/titulo_tesouro/1'.format(TestTituloTesouroRequestHandler.BASE_URL),
+            data=json.dumps({
+            'categoria_titulo': 'NTN-B Principal'
+        }))
+
+        self.assertEqual(resp.status_code, 404)
+        self.assertIn('err', resp.json())
+        self.assertEqual(resp.json()['err'], '"titulo_id" has no register.')
+
+    def test_update_with_existing_id(self):
+        resp = requests.post('{}/titulo_tesouro'.format(TestTituloTesouroRequestHandler.BASE_URL),
+            data=json.dumps({
+            'categoria_titulo': 'NTN-B',
+            'mês': 5,
+            'ano': 2017,
+            'ação': 'venda',
+            'valor': 666
+        }))
+
+        self.assertEqual(resp.status_code, 201)
+        self.assertEqual(resp.json(), {
+            'success': {
+                'id': 1,
+                'categoria_titulo': 'NTN-B',
+                'mês': 5,
+                'ano': 2017,
+                'ação': 'VENDA',
+                'valor': 666.00
+            }
+        })
+
+        resp = requests.put('{}/titulo_tesouro/1'.format(TestTituloTesouroRequestHandler.BASE_URL),
+            data=json.dumps({
+            'categoria_titulo': 'NTN-B Principal'
+        }))
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.json(), {
+            'success': {
+                'categoria_titulo': 'NTN-B Principal'
+            }
+        })
 
 
 if __name__ == '__main__':

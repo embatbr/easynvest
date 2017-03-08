@@ -1,0 +1,1 @@
+SELECT to_char(expire_at, 'YYYY'), to_char(expire_at, 'MM') FROM tesouro_direto_series WHERE id = {};

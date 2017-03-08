@@ -3,8 +3,6 @@ BEGIN;
 
 DROP TABLE IF EXISTS tesouro_direto_series;
 
-DROP TABLE IF EXISTS category_ids;
-
 DO $$
 BEGIN
     IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'action_type') THEN

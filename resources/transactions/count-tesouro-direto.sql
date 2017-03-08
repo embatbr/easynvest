@@ -1,0 +1,1 @@
+SELECT count(*) FROM tesouro_direto_series WHERE id = {};
