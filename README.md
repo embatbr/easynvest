@@ -153,6 +153,8 @@ TODO
 }
 ```
 
+If the parameter **groupby=true** is present, the `mes` key is not present and **valor** is the summarization in the period.
+
 
 ## Testing
 

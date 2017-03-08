@@ -102,7 +102,7 @@ class HelpRequestHandler(RequestHandler):
         self.endpoints = endpoints
 
     def on_get(self, req, resp):
-        super().on_get(req, resp)
+        super(HelpRequestHandler, self).on_get(req, resp)
 
         resp.body = 'System healthy.\n\nEndpoints: {}'.format(self.endpoints)
 
@@ -129,7 +129,7 @@ class TituloTesouroRequestHandler(RequestHandler):
         return missing_fields
 
     def on_post(self, req, resp):
-        super().on_post(req, resp)
+        super(TituloTesouroRequestHandler, self).on_post(req, resp)
 
         if req.content_length == 0:
             self.err_bad_request(resp, 'No request body.')
@@ -152,7 +152,7 @@ class TituloTesouroRequestHandler(RequestHandler):
             self.err_bad_request(resp, str(e))
 
     def on_delete(self, req, resp, titulo_id):
-        super().on_delete(req, resp)
+        super(TituloTesouroRequestHandler, self).on_delete(req, resp)
 
         try:
             ret = self.titulo_tesouro_crud.delete(titulo_id)
@@ -165,7 +165,7 @@ class TituloTesouroRequestHandler(RequestHandler):
             self.err_bad_request(resp, str(e))
 
     def on_put(self, req, resp, titulo_id):
-        super().on_put(req, resp)
+        super(TituloTesouroRequestHandler, self).on_put(req, resp)
 
         if req.content_length == 0:
             self.err_bad_request(resp, 'No request body.')
@@ -190,7 +190,7 @@ class TituloTesouroRequestHandler(RequestHandler):
             self.err_bad_request(resp, str(e))
 
     def on_get(self, req, resp, titulo_id):
-        super().on_get(req, resp)
+        super(TituloTesouroRequestHandler, self).on_get(req, resp)
 
         params = req.params
 
@@ -216,24 +216,20 @@ class TituloTesouroRefinedRequestHandler(RequestHandler):
         self.titulo_tesouro_crud = titulo_tesouro_crud
 
     def on_get(self, req, resp, titulo_id):
-        super().on_get(req, resp)
+        super(TituloTesouroRefinedRequestHandler, self).on_get(req, resp)
 
         action = req.path.split('/')[2]
+        params = req.params
 
-        if action not in ('comparar', 'venda', 'resgate'):
-            self.err_bad_request(resp, 'Non existing path')
-        else:
-            params = req.params
+        try:
+            if action == 'comparar':
+                pass # TO DO LATER
+            else: # venda or resgate
+                ret = self.titulo_tesouro_crud.read_by_action(titulo_id, action, params)
 
-            try:
-                if action == 'comparar':
-                    pass # TO DO LATER
-                else: # venda or resgate
-                    ret = self.titulo_tesouro_crud.read_by_action(titulo_id, action, params)
-
-                    if ret:
-                        self.ok(resp, ret)
-                    else:
-                        self.err_not_found(resp, '"titulo_id" has no register for action "{}".'.format(action))
-            except Exception as e:
-                self.err_bad_request(resp, str(e))
+                if ret:
+                    self.ok(resp, ret)
+                else:
+                    self.err_not_found(resp, '"titulo_id" has no register for action "{}".'.format(action))
+        except Exception as e:
+            self.err_bad_request(resp, str(e))

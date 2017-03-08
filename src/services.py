@@ -25,7 +25,8 @@ class TituloTesouroCRUD(object):
             'read-history': open('{}/read-history.sql'.format(TRANSACTIONS_PATH)).read(),
             'read-history-grouped': open('{}/read-history-grouped.sql'.format(TRANSACTIONS_PATH)).read(),
             'get-category': open('{}/get-category.sql'.format(TRANSACTIONS_PATH)).read(),
-            'read-by-action': open('{}/read-by-action.sql'.format(TRANSACTIONS_PATH)).read()
+            'read-by-action': open('{}/read-by-action.sql'.format(TRANSACTIONS_PATH)).read(),
+            'read-by-action-grouped': open('{}/read-by-action-grouped.sql'.format(TRANSACTIONS_PATH)).read()
         }
 
     def _validate_category(self, category):
@@ -236,18 +237,21 @@ class TituloTesouroCRUD(object):
         category = None
         result = list()
 
-        print()
-        print(result_get_category)
-        print()
-
         if result_get_category:
             category = result_get_category[0][0]
 
-            cur.execute(self.queries['read-by-action'].format(action.upper(), category, start_date, end_date))
-            result = cur.fetchall()
+            if group_by_year:
+                cur.execute(self.queries['read-by-action-grouped'].format(action.upper(), category, start_date, end_date))
+                result = cur.fetchall()
 
-            result = [{'ano': int(res[0]), 'mes': int(res[1]), 'valor': format_currency(float(res[2]), 'BRL')}
-                      for res in result]
+                result = [{'ano': int(res[0]), 'valor': format_currency(float(res[1]), 'BRL')}
+                          for res in result]
+            else:
+                cur.execute(self.queries['read-by-action'].format(action.upper(), category, start_date, end_date))
+                result = cur.fetchall()
+
+                result = [{'ano': int(res[0]), 'mes': int(res[1]), 'valor': format_currency(float(res[2]), 'BRL')}
+                          for res in result]
 
         cur.close()
         conn.close()
