@@ -119,6 +119,40 @@ or
 - data_fim (optional): in the format **YYYY-mm**
 - group_by (optional): boolean
 
+**Response body:** as defined in the description
+
+###### 5. GET /titulo_tesouro/comparar/
+
+TODO
+
+###### 6. GET /titulos_tesouro/venda/{id} and 7. GET /titulos_tesouro/resgate/{id}
+
+**Parameters:** similar to (4)
+
+**Response body:** for path **titulo_tesouro/venda/1488?data_inicio=2014-05&data_fim=2016-09**
+
+```json
+{
+    "success": {
+        "id": 1488,
+        "categoria_titulo": "NTN-F",
+        "valores_venda": [
+            {
+                "valor": "R$16.540.000,00",
+                "mes": 5,
+                "ano": 2014
+            },
+            ...
+            {
+                "valor": "R$17.000.000,00",
+                "mes": 4,
+                "ano": 2016
+            }
+        ]
+    }
+}
+```
+
 
 ## Testing
 

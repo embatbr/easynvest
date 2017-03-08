@@ -24,7 +24,8 @@ class TituloTesouroCRUD(object):
             'update-tesouro-direto': open('{}/update-tesouro-direto.sql'.format(TRANSACTIONS_PATH)).read(),
             'read-history': open('{}/read-history.sql'.format(TRANSACTIONS_PATH)).read(),
             'read-history-grouped': open('{}/read-history-grouped.sql'.format(TRANSACTIONS_PATH)).read(),
-            'get-category': open('{}/get-category.sql'.format(TRANSACTIONS_PATH)).read()
+            'get-category': open('{}/get-category.sql'.format(TRANSACTIONS_PATH)).read(),
+            'read-by-action': open('{}/read-by-action.sql'.format(TRANSACTIONS_PATH)).read()
         }
 
     def _validate_category(self, category):
@@ -161,7 +162,7 @@ class TituloTesouroCRUD(object):
             return True
         return False
 
-    def read(self, titulo_id, params):
+    def _read_aux(self, titulo_id, params):
         self._validate_titulo_id(titulo_id)
 
         start_date = pendulum.create(2002, 1, 1, 0, 0, 0)
@@ -180,6 +181,11 @@ class TituloTesouroCRUD(object):
 
         start_date = start_date.strftime('%Y-%m-%d %H:%M:%S')
         end_date = end_date.strftime('%Y-%m-%d %H:%M:%S')
+
+        return (start_date, end_date, group_by_year)
+
+    def read_history(self, titulo_id, params):
+        (start_date, end_date, group_by_year) = self._read_aux(titulo_id, params)
 
         conn = psycopg2.connect(**DATABASE_PARAMS)
         cur = conn.cursor()
@@ -217,4 +223,40 @@ class TituloTesouroCRUD(object):
             'id': int(titulo_id),
             'categoria_titulo': category,
             'historico' : result_history
+        }
+
+    def read_by_action(self, titulo_id, action, params):
+        (start_date, end_date, group_by_year) = self._read_aux(titulo_id, params)
+
+        conn = psycopg2.connect(**DATABASE_PARAMS)
+        cur = conn.cursor()
+
+        cur.execute(self.queries['get-category'].format(titulo_id))
+        result_get_category = cur.fetchall()
+        category = None
+        result = list()
+
+        print()
+        print(result_get_category)
+        print()
+
+        if result_get_category:
+            category = result_get_category[0][0]
+
+            cur.execute(self.queries['read-by-action'].format(action.upper(), category, start_date, end_date))
+            result = cur.fetchall()
+
+            result = [{'ano': int(res[0]), 'mes': int(res[1]), 'valor': format_currency(float(res[2]), 'BRL')}
+                      for res in result]
+
+        cur.close()
+        conn.close()
+
+        if not result_get_category:
+            return False
+
+        return {
+            'id': int(titulo_id),
+            'categoria_titulo': category,
+            'valores_{}'.format(action) : result
         }
