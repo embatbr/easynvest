@@ -187,3 +187,15 @@ class TituloTesouroRequestHandler(RequestHandler):
 
     def on_get(self, req, resp, titulo_id):
         super().on_get(req, resp)
+
+        params = req.params
+
+        try:
+            ret = self.titulo_tesouro_crud.read(titulo_id, params)
+
+            if ret:
+                self.ok(resp, ret)
+            else:
+                self.err_not_found(resp, '"titulo_id" has no register.')
+        except Exception as e:
+            self.err_bad_request(resp, str(e))

@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS tesouro_direto_series (
     category        category_type                   NOT NULL,
     action          action_type                     NOT NULL,
     expire_at       TIMESTAMP WITHOUT TIME ZONE     NOT NULL,
-    amount          MONEY                           NOT NULL,
+    amount          DECIMAL                         NOT NULL,
 
     PRIMARY KEY (id),
     UNIQUE (category, action, expire_at)

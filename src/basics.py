@@ -3,6 +3,7 @@
 
 
 import os
+import pendulum
 
 
 PROJECT_ROOT_PATH = os.environ.get('PROJECT_ROOT_PATH')
@@ -26,3 +27,5 @@ TRANSACTIONS_PATH = '{}/transactions'.format(RESOURCES_PATH)
 
 TITULO_TESOURO_CATEGORIES = ['LTN', 'LFT', 'NTN-B', 'NTN-B Principal', 'NTN-C', 'NTN-F']
 TITULO_TESOURO_ACTIONS = ['VENDA', 'RESGATE']
+
+INITIAL_DATE = pendulum.create(2002, 1, 1, 0, 0, 0)

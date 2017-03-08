@@ -2,11 +2,12 @@
 """
 
 
+from babel.numbers import format_currency
 import pendulum
 import psycopg2
 
 from src.basics import TITULO_TESOURO_CATEGORIES, TITULO_TESOURO_ACTIONS
-from src.basics import TRANSACTIONS_PATH, DATABASE_PARAMS
+from src.basics import TRANSACTIONS_PATH, DATABASE_PARAMS, INITIAL_DATE
 
 
 class TituloTesouroCRUD(object):
@@ -20,7 +21,10 @@ class TituloTesouroCRUD(object):
             'count-tesouro-direto': open('{}/count-tesouro-direto.sql'.format(TRANSACTIONS_PATH)).read(),
             'delete-tesouro-direto': open('{}/delete-tesouro-direto.sql'.format(TRANSACTIONS_PATH)).read(),
             'get-expire_at': open('{}/get-expire_at.sql'.format(TRANSACTIONS_PATH)).read(),
-            'update-tesouro-direto': open('{}/update-tesouro-direto.sql'.format(TRANSACTIONS_PATH)).read()
+            'update-tesouro-direto': open('{}/update-tesouro-direto.sql'.format(TRANSACTIONS_PATH)).read(),
+            'read-history': open('{}/read-history.sql'.format(TRANSACTIONS_PATH)).read(),
+            'read-history-grouped': open('{}/read-history-grouped.sql'.format(TRANSACTIONS_PATH)).read(),
+            'get-category': open('{}/get-category.sql'.format(TRANSACTIONS_PATH)).read()
         }
 
     def _validate_category(self, category):
@@ -34,7 +38,7 @@ class TituloTesouroCRUD(object):
 
     def _validate_year(self, year):
         assert isinstance(year, int), '"year" must be an integer.'
-        assert year >= 2002, '"year" must be greater than or equal to 2002.'
+        assert year >= INITIAL_DATE.year, '"year" must be greater than or equal to {}.'.format(INITIAL_DATE.year)
 
     def _validate_action(self, action):
         assert isinstance(action, str), '"action" must be a string.'
@@ -49,6 +53,15 @@ class TituloTesouroCRUD(object):
         assert titulo_id.isdigit(), '"titulo_id" must be an int.'
         titulo_id = int(titulo_id)
         assert titulo_id > 0, '"titulo_id" must be greater than zero.'
+
+    def _validade_date(self, date):
+        unpacked = date.split('-')
+        assert len(unpacked) == 2, 'date not in format "YYYY-mm"'
+        (year, month) = unpacked
+        assert year.isdigit(), 'year must be a positive int.'
+        self._validate_year(int(year))
+        assert month.isdigit(), 'month must be a positive int.'
+        self._validate_month(int(month))
 
     def create(self, category, month, year, action, amount):
         self._validate_category(category)
@@ -147,3 +160,61 @@ class TituloTesouroCRUD(object):
         if result:
             return True
         return False
+
+    def read(self, titulo_id, params):
+        self._validate_titulo_id(titulo_id)
+
+        start_date = pendulum.create(2002, 1, 1, 0, 0, 0)
+        end_date = pendulum.now()
+        group_by_year = False
+
+        if 'data_inicio' in params:
+            self._validade_date(params['data_inicio'])
+            start_date = pendulum.strptime('{}-01'.format(params['data_inicio']), '%Y-%m-%d')
+        if 'data_fim' in params:
+            self._validade_date(params['data_fim'])
+            end_date = pendulum.strptime('{}-01'.format(params['data_fim']), '%Y-%m-%d')
+        if 'group_by' in params:
+            assert params['group_by'] in ('true', 'false'), '"group_by" must be "true" or "false".'
+            group_by_year = True if params['group_by'] == 'true' else False
+
+        start_date = start_date.strftime('%Y-%m-%d %H:%M:%S')
+        end_date = end_date.strftime('%Y-%m-%d %H:%M:%S')
+
+        conn = psycopg2.connect(**DATABASE_PARAMS)
+        cur = conn.cursor()
+
+        cur.execute(self.queries['get-category'].format(titulo_id))
+        result_get_category = cur.fetchall()
+        category = None
+        result_history = list()
+
+        if result_get_category:
+            category = result_get_category[0][0]
+
+            if group_by_year:
+                cur.execute(self.queries['read-history-grouped'].format(category, start_date, end_date))
+                result_history = cur.fetchall()
+
+                result_history = [{'ano': int(res[0]), 'valor_venda': format_currency(float(res[1]), 'BRL'),
+                                   'valor_resgate': format_currency(float(res[2]), 'BRL')}
+                                   for res in result_history]
+            else:
+                cur.execute(self.queries['read-history'].format(category, start_date, end_date))
+                result_history = cur.fetchall()
+
+                result_history = [{'mes': int(res[0]), 'ano': int(res[1]), 'valor_venda': format_currency(float(res[2]), 'BRL'),
+                                   'valor_resgate': format_currency(float(res[3]), 'BRL')}
+                                   for res in result_history]
+
+        cur.close()
+        conn.close()
+
+        if not result_get_category:
+            return False
+
+        return {
+            'id': int(titulo_id),
+            'categoria_titulo': category,
+            'historico' : result_history
+        }
