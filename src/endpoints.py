@@ -39,9 +39,6 @@ class RequestHandler(object):
     """Superclass for all request handlers.
     """
 
-    def on_get(self, req, resp):
-        logging.info('GET request received at endpoint "{}"'.format(req.path))
-
     def on_post(self, req, resp):
         logging.info('POST request received at endpoint "{}"'.format(req.path))
 
@@ -50,6 +47,9 @@ class RequestHandler(object):
 
     def on_put(self, req, resp):
         logging.info('PUT request received at endpoint "{}"'.format(req.path))
+
+    def on_get(self, req, resp):
+        logging.info('GET request received at endpoint "{}"'.format(req.path))
 
     def set_response_status_code(self, resp, code):
         resp.status = getattr(falcon, 'HTTP_{}'.format(code))
@@ -178,8 +178,12 @@ class TituloTesouroRequestHandler(RequestHandler):
             ret = self.titulo_tesouro_crud.update(titulo_id, body)
 
             if ret:
+                body['id'] = int(titulo_id)
                 self.ok(resp, body)
             else:
                 self.err_not_found(resp, '"titulo_id" has no register.')
         except Exception as e:
             self.err_bad_request(resp, str(e))
+
+    def on_get(self, req, resp, titulo_id):
+        super().on_get(req, resp)

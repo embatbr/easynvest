@@ -371,15 +371,47 @@ class TestTituloTesouroRequestHandler(unittest.TestCase):
 
         resp = requests.put('{}/titulo_tesouro/1'.format(TestTituloTesouroRequestHandler.BASE_URL),
             data=json.dumps({
-            'categoria_titulo': 'NTN-B Principal'
+            'ação': 'resgate'
         }))
 
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.json(), {
             'success': {
-                'categoria_titulo': 'NTN-B Principal'
+                'id': 1,
+                'ação': 'resgate'
             }
         })
+
+    def test_update_categoria_titulo(self):
+        resp = requests.post('{}/titulo_tesouro'.format(TestTituloTesouroRequestHandler.BASE_URL),
+            data=json.dumps({
+            'categoria_titulo': 'NTN-B',
+            'mês': 5,
+            'ano': 2017,
+            'ação': 'venda',
+            'valor': 666
+        }))
+
+        self.assertEqual(resp.status_code, 201)
+        self.assertEqual(resp.json(), {
+            'success': {
+                'id': 1,
+                'categoria_titulo': 'NTN-B',
+                'mês': 5,
+                'ano': 2017,
+                'ação': 'VENDA',
+                'valor': 666.00
+            }
+        })
+
+        resp = requests.put('{}/titulo_tesouro/1'.format(TestTituloTesouroRequestHandler.BASE_URL),
+            data=json.dumps({
+            'categoria_titulo': 'NTN-B Principal'
+        }))
+
+        self.assertEqual(resp.status_code, 400)
+        self.assertIn('err', resp.json())
+        self.assertEqual(resp.json()['err'], 'Field "categoria_titulo" cannot be updated')
 
 
 if __name__ == '__main__':

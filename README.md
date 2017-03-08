@@ -50,7 +50,7 @@ Used by the first four functionalities described.
 
 ###### 1. POST /titulo_tesouro
 
-The POST body is similar to the one below:
+**Request body:**
 
 ```json
 {
@@ -64,11 +64,64 @@ The POST body is similar to the one below:
 
 The types of each parameter can be guessed: string, int, int, string and float (or int). The field **valor** may receive a number such as 15321.99, 15321.99999 or 15.321. In case of a float with more than 2 decimals, it is rounded.
 
+**Response body:**
+
+```json
+{
+    "success": {
+        "id": <NEXT_INTEGER>
+        "categoria_titulo": "NTN-B",
+        "mês": 4,
+        "ano": 2017,
+        "ação": "venda",
+        "valor": 15321.99
+    }
+}
+```
+
+or
+
+```json
+{
+    "err": <ERROR_MESSAGE>
+}
+```
+
+###### 2. DELETE /titulo_tesouro/{id}
+
+**Response body:**
+
+```json
+{
+  "success": "Deleted."
+}
+```
+
+or
+
+```json
+{
+  "err": "\"titulo_id\" has no register."
+}
+```
+
+###### 3. PUT /titulo_tesouro/{id}
+
+**Request body:** similar to the (1), without the field "categoria_titulo" and with the others optional.
+
+**Response body:** the same as the response, added the field "id".
+
+###### 4. GET /titulo_tesouro/{id}
+
+**Parameters:**
+
+- data_inicio (optional): in the format **YYYY-mm**
+- data_fim (optional): in the format **YYYY-mm**
+- group_by (optional): boolean
+
 
 ## Testing
 
 Test coverage in this project is not high (and this is a good thing). Since many unit tests can be replaced by a simple `assert` and the project was design in a way that module `services` is only used by module `endpoints`, all failures the first may raise will appear when testing the second.
 
-The package `unittest` from Python is used for both unit tests and system tests.
-
-All tests are found in directory *tests*.
+The package `unittest` from Python is used for both unit tests and "system/integration tests". All tests are found in directory *tests*.

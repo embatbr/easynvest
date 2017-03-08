@@ -117,21 +117,21 @@ class TituloTesouroCRUD(object):
             year = int(result[0][0])
             month = int(result[0][1])
 
+            assert 'categoria_titulo' not in data, 'Field "categoria_titulo" cannot be updated'
+
             fields = list()
-            if 'categoria_titulo' in data:
-                self._validate_category(data['categoria_titulo'])
-                fields.append("category = '{}'".format(data['categoria_titulo']))
+
             if 'mês' in data:
-                self._validate_action(data['mês'])
+                self._validate_month(data['mês'])
                 month = data['mês']
             if 'ano' in data:
-                self._validate_amount(data['ano'])
+                self._validate_year(data['ano'])
                 year = data['ano']
             if 'ação' in data:
-                self._validate_month(data['ação'].upper())
+                self._validate_action(data['ação'].upper())
                 fields.append("action = '{}'".format(data['ação'].upper()))
             if 'valor' in data:
-                self._validate_year(data['valor'])
+                self._validate_amount(data['valor'])
                 fields.append("amount = {}".format(data['valor']))
 
             expire_at = pendulum.create(year, month, 1, 0, 0, 0).strftime('%Y-%m-%d %H:%M:%S')
