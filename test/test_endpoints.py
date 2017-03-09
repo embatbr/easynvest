@@ -449,7 +449,7 @@ class TestTituloTesouroRequestHandler(TestRequestHandler):
 
         resp = requests.get('{}/1488'.format(TestRequestHandler.BASE_URL), params={
             'data_inicio': '2014-05',
-            'data_fim': '2016-10'
+            'data_fim': '2014-10'
         })
 
         self.assertEqual(resp.status_code, 200)
@@ -459,148 +459,40 @@ class TestTituloTesouroRequestHandler(TestRequestHandler):
             "categoria_titulo": "NTN-F",
             "historico": [
                 {
+                    "ano": 2014,
+                    "valor_resgate": "R$10.630.000,00",
                     "valor_venda": "R$16.540.000,00",
-                    "mes": 5,
-                    "ano": 2014,
-                    "valor_resgate": "R$10.630.000,00"
+                    "mes": 5
                 },
                 {
+                    "ano": 2014,
+                    "valor_resgate": "R$6.330.000,00",
                     "valor_venda": "R$12.300.000,00",
-                    "mes": 6,
-                    "ano": 2014,
-                    "valor_resgate": "R$6.330.000,00"
+                    "mes": 6
                 },
                 {
+                    "ano": 2014,
+                    "valor_resgate": "R$56.270.000,00",
                     "valor_venda": "R$14.420.000,00",
-                    "mes": 7,
-                    "ano": 2014,
-                    "valor_resgate": "R$56.270.000,00"
+                    "mes": 7
                 },
                 {
+                    "ano": 2014,
+                    "valor_resgate": "R$12.240.000,00",
                     "valor_venda": "R$13.120.000,00",
-                    "mes": 8,
-                    "ano": 2014,
-                    "valor_resgate": "R$12.240.000,00"
+                    "mes": 8
                 },
                 {
+                    "ano": 2014,
+                    "valor_resgate": "R$14.920.000,00",
                     "valor_venda": "R$8.170.000,00",
-                    "mes": 9,
-                    "ano": 2014,
-                    "valor_resgate": "R$14.920.000,00"
+                    "mes": 9
                 },
                 {
+                    "ano": 2014,
+                    "valor_resgate": "R$14.510.000,00",
                     "valor_venda": "R$9.720.000,00",
-                    "mes": 10,
-                    "ano": 2014,
-                    "valor_resgate": "R$14.510.000,00"
-                },
-                {
-                    "valor_venda": "R$13.490.000,00",
-                    "mes": 11,
-                    "ano": 2014,
-                    "valor_resgate": "R$8.880.000,00"
-                },
-                {
-                    "valor_venda": "R$9.560.000,00",
-                    "mes": 12,
-                    "ano": 2014,
-                    "valor_resgate": "R$9.680.000,00"
-                },
-                {
-                    "valor_venda": "R$9.900.000,00",
-                    "mes": 1,
-                    "ano": 2015,
-                    "valor_resgate": "R$13.400.000,00"
-                },
-                {
-                    "valor_venda": "R$9.460.000,00",
-                    "mes": 2,
-                    "ano": 2015,
-                    "valor_resgate": "R$10.480.000,00"
-                },
-                {
-                    "valor_venda": "R$14.540.000,00",
-                    "mes": 3,
-                    "ano": 2015,
-                    "valor_resgate": "R$12.370.000,00"
-                },
-                {
-                    "valor_venda": "R$7.400.000,00",
-                    "mes": 4,
-                    "ano": 2015,
-                    "valor_resgate": "R$10.220.000,00"
-                },
-                {
-                    "valor_venda": "R$16.850.000,00",
-                    "mes": 5,
-                    "ano": 2015,
-                    "valor_resgate": "R$10.260.000,00"
-                },
-                {
-                    "valor_venda": "R$11.790.000,00",
-                    "mes": 6,
-                    "ano": 2015,
-                    "valor_resgate": "R$7.750.000,00"
-                },
-                {
-                    "valor_venda": "R$10.500.000,00",
-                    "mes": 7,
-                    "ano": 2015,
-                    "valor_resgate": "R$61.860.000,00"
-                },
-                {
-                    "valor_venda": "R$29.040.000,00",
-                    "mes": 8,
-                    "ano": 2015,
-                    "valor_resgate": "R$16.290.000,00"
-                },
-                {
-                    "valor_venda": "R$62.790.000,00",
-                    "mes": 9,
-                    "ano": 2015,
-                    "valor_resgate": "R$18.550.000,00"
-                },
-                {
-                    "valor_venda": "R$22.500.000,00",
-                    "mes": 10,
-                    "ano": 2015,
-                    "valor_resgate": "R$11.350.000,00"
-                },
-                {
-                    "valor_venda": "R$22.930.000,00",
-                    "mes": 11,
-                    "ano": 2015,
-                    "valor_resgate": "R$10.180.000,00"
-                },
-                {
-                    "valor_venda": "R$25.330.000,00",
-                    "mes": 12,
-                    "ano": 2015,
-                    "valor_resgate": "R$11.810.000,00"
-                },
-                {
-                    "valor_venda": "R$28.720.000,00",
-                    "mes": 1,
-                    "ano": 2016,
-                    "valor_resgate": "R$61.830.000,00"
-                },
-                {
-                    "valor_venda": "R$29.370.000,00",
-                    "mes": 2,
-                    "ano": 2016,
-                    "valor_resgate": "R$16.280.000,00"
-                },
-                {
-                    "valor_venda": "R$32.050.000,00",
-                    "mes": 3,
-                    "ano": 2016,
-                    "valor_resgate": "R$23.700.000,00"
-                },
-                {
-                    "valor_venda": "R$17.000.000,00",
-                    "mes": 4,
-                    "ano": 2016,
-                    "valor_resgate": "R$17.150.000,00"
+                    "mes": 10
                 }
             ]
         })
