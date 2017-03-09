@@ -17,15 +17,16 @@ class EndpointExpositor(object):
         self.falcon_api = falcon_api
 
         titulo_tesouro_request_handler = TituloTesouroRequestHandler(titulo_tesouro_crud)
-        titulo_tesouro_refined_request_handler = TituloTesouroRefinedRequestHandler(titulo_tesouro_crud)
+        titulo_tesouro_compare_request_handler = TituloTesouroCompareRequestHandler(titulo_tesouro_crud)
+        titulo_tesouro_by_action_request_handler = TituloTesouroByActionRequestHandler(titulo_tesouro_crud)
 
         self.endpoint_mapping = {
             '/': None,
             '/titulo_tesouro': titulo_tesouro_request_handler,
             '/titulo_tesouro/{titulo_id}': titulo_tesouro_request_handler,
-            '/titulo_tesouro/comparar/{titulo_id}': titulo_tesouro_refined_request_handler,
-            '/titulo_tesouro/venda/{titulo_id}': titulo_tesouro_refined_request_handler,
-            '/titulo_tesouro/resgate/{titulo_id}': titulo_tesouro_refined_request_handler
+            '/titulo_tesouro/comparar/': titulo_tesouro_compare_request_handler,
+            '/titulo_tesouro/venda/{titulo_id}': titulo_tesouro_by_action_request_handler,
+            '/titulo_tesouro/resgate/{titulo_id}': titulo_tesouro_by_action_request_handler
         }
 
         endpoints = list(self.endpoint_mapping.keys())
@@ -205,31 +206,52 @@ class TituloTesouroRequestHandler(RequestHandler):
             self.err_bad_request(resp, str(e))
 
 
-class TituloTesouroRefinedRequestHandler(RequestHandler):
-    """Handler for POST in endpoints "titulo_tesouro/comparar", "titulo_tesouro/venda"
-    and "titulo_tesouro/resgate".
+class TituloTesouroCompareRequestHandler(RequestHandler):
+    """Handler for POST in endpoint "titulo_tesouro/comparar".
     """
 
     def __init__(self, titulo_tesouro_crud):
-        super(TituloTesouroRefinedRequestHandler, self).__init__()
+        super(TituloTesouroCompareRequestHandler, self).__init__()
+
+        self.titulo_tesouro_crud = titulo_tesouro_crud
+
+    def on_get(self, req, resp):
+        super(TituloTesouroCompareRequestHandler, self).on_get(req, resp)
+
+        params = req.params
+
+        try:
+            ret = self.titulo_tesouro_crud.compare(params)
+
+            if ret:
+                self.ok(resp, ret)
+            else:
+                self.err_not_found(resp, 'One of the ids was not found.')
+        except Exception as e:
+            self.err_bad_request(resp, str(e))
+
+
+class TituloTesouroByActionRequestHandler(RequestHandler):
+    """Handler for POST in endpoints "titulo_tesouro/venda" and "titulo_tesouro/resgate".
+    """
+
+    def __init__(self, titulo_tesouro_crud):
+        super(TituloTesouroByActionRequestHandler, self).__init__()
 
         self.titulo_tesouro_crud = titulo_tesouro_crud
 
     def on_get(self, req, resp, titulo_id):
-        super(TituloTesouroRefinedRequestHandler, self).on_get(req, resp)
+        super(TituloTesouroByActionRequestHandler, self).on_get(req, resp)
 
         action = req.path.split('/')[2]
         params = req.params
 
         try:
-            if action == 'comparar':
-                pass # TO DO LATER
-            else: # venda or resgate
-                ret = self.titulo_tesouro_crud.read_by_action(titulo_id, action, params)
+            ret = self.titulo_tesouro_crud.read_by_action(titulo_id, action, params)
 
-                if ret:
-                    self.ok(resp, ret)
-                else:
-                    self.err_not_found(resp, '"titulo_id" has no register for action "{}".'.format(action))
+            if ret:
+                self.ok(resp, ret)
+            else:
+                self.err_not_found(resp, '"titulo_id" has no register for action "{}".'.format(action))
         except Exception as e:
             self.err_bad_request(resp, str(e))

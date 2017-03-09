@@ -123,7 +123,13 @@ or
 
 ###### 5. GET /titulo_tesouro/comparar/
 
-TODO
+**Parameters:** as explained in the description
+
+**Response body:**
+
+Not possible. Due to the modeling, I figured out that the `id` is not by register, but by date. In my modeling, a **VENDA** input and a **RESGATE** input are different rows, with different ids. For the expected response in this case, I assume the id is the same (e.g., i = 5 is for year = 2013, month = 2 and both amounts - VENDA and RESGATE - of R$ 2.349,00). Since this one was the last one I did, I just realized it after write all other functionalities (that work as expected).
+
+The tests for this case only cover the requests with invalid parameters.
 
 ###### 6. GET /titulos_tesouro/venda/{id} and 7. GET /titulos_tesouro/resgate/{id}
 

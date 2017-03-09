@@ -658,6 +658,48 @@ class TestTituloTesouroRefinedRequestHandler(TestRequestHandler):
             ]
         })
 
+    def test_compare_without_ids(self):
+        resp = requests.get('{}/comparar'.format(TestRequestHandler.BASE_URL))
+
+        self.assertEqual(resp.status_code, 400)
+        self.assertIn('err', resp.json())
+        self.assertEqual(resp.json()['err'], 'Missing mandatory parameter "ids".')
+
+    def test_compare_with_non_list_ids(self):
+        resp = requests.get('{}/comparar'.format(TestRequestHandler.BASE_URL), params={
+            'ids': '[1, 33, 643]'
+        })
+
+        self.assertEqual(resp.status_code, 400)
+        self.assertIn('err', resp.json())
+        self.assertEqual(resp.json()['err'], 'Parameter "ids" must be a list.')
+
+    def test_compare_with_list_of_non_integer_ids(self):
+        resp = requests.get('{}/comparar'.format(TestRequestHandler.BASE_URL), params={
+            'ids': ['one', 33, 643]
+        })
+
+        self.assertEqual(resp.status_code, 400)
+        self.assertIn('err', resp.json())
+        self.assertEqual(resp.json()['err'], '"titulo_id" must be an int.')
+
+    def test_compare_with_list_containing_not_found_ids(self):
+        resp = requests.get('{}/comparar'.format(TestRequestHandler.BASE_URL), params={
+            'ids': [9999, 99999, 999999]
+        })
+
+        self.assertEqual(resp.status_code, 404)
+        self.assertIn('err', resp.json())
+        self.assertEqual(resp.json()['err'], 'One of the ids was not found.')
+
+        resp = requests.get('{}/comparar'.format(TestRequestHandler.BASE_URL), params={
+            'ids': [1, 33, 999999]
+        })
+
+        self.assertEqual(resp.status_code, 404)
+        self.assertIn('err', resp.json())
+        self.assertEqual(resp.json()['err'], 'One of the ids was not found.')
+
 
 if __name__ == '__main__':
     unittest.main()

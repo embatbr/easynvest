@@ -1,0 +1,1 @@
+SELECT category, id FROM tesouro_direto_series WHERE id IN ({});

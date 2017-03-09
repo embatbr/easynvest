@@ -26,7 +26,9 @@ class TituloTesouroCRUD(object):
             'read-history-grouped': open('{}/read-history-grouped.sql'.format(TRANSACTIONS_PATH)).read(),
             'get-category': open('{}/get-category.sql'.format(TRANSACTIONS_PATH)).read(),
             'read-by-action': open('{}/read-by-action.sql'.format(TRANSACTIONS_PATH)).read(),
-            'read-by-action-grouped': open('{}/read-by-action-grouped.sql'.format(TRANSACTIONS_PATH)).read()
+            'read-by-action-grouped': open('{}/read-by-action-grouped.sql'.format(TRANSACTIONS_PATH)).read(),
+            'get-category-by-id': open('{}/get-category-by-id.sql'.format(TRANSACTIONS_PATH)).read(),
+            'compare': open('{}/compare.sql'.format(TRANSACTIONS_PATH)).read()
         }
 
     def _validate_category(self, category):
@@ -164,7 +166,11 @@ class TituloTesouroCRUD(object):
         return False
 
     def _read_aux(self, titulo_id, params):
-        self._validate_titulo_id(titulo_id)
+        if isinstance(titulo_id, list):
+            for titulo_id_elto in titulo_id:
+                self._validate_titulo_id(titulo_id_elto)
+        else:
+            self._validate_titulo_id(titulo_id)
 
         start_date = pendulum.create(2002, 1, 1, 0, 0, 0)
         end_date = pendulum.now()
@@ -225,6 +231,33 @@ class TituloTesouroCRUD(object):
             'categoria_titulo': category,
             'historico' : result_history
         }
+
+    def compare(self, params):
+        assert 'ids' in params, 'Missing mandatory parameter "ids".'
+        assert isinstance(params['ids'], list), 'Parameter "ids" must be a list.'
+        ids = params['ids']
+        assert len(ids) >= 2, 'Must have at least 2 ids.'
+        (start_date, end_date, group_by_year) = self._read_aux(ids, params)
+
+        conn = psycopg2.connect(**DATABASE_PARAMS)
+        cur = conn.cursor()
+
+        cur.execute(self.queries['get-category-by-id'].format(", ".join(ids)))
+        result_get_category_by_id = cur.fetchall()
+        result = list()
+
+        if result_get_category_by_id and len(result_get_category_by_id) == len(ids):
+            cur.execute(self.queries['compare'].format(start_date, end_date, ", ".join(ids)))
+            result = cur.fetchall()
+            # INCOMPLETE
+
+        cur.close()
+        conn.close()
+
+        if (not result_get_category_by_id) or len(result_get_category_by_id) < len(ids):
+            return False
+
+        return result
 
     def read_by_action(self, titulo_id, action, params):
         (start_date, end_date, group_by_year) = self._read_aux(titulo_id, params)
